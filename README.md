@@ -1,13 +1,10 @@
-# Vue 3 + Vite
-
-
 # Nombre: Vuestro Nombre
 # Tecnologías: Vue 3 + Vite + vue-router
 # Versión Node: v22.19.0
 
 
 # instrucciones de instalacion
-# 1. clonar repositorio_
+# 1. clonar repositorio
 git clone http://github.com/usuario/mi-proyecto.git
 cd mi-proyecto
 

@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-dark bg-primary navbar-expand-lg sticky-top">
     <div class="container-lg">
-      <router-link to="/" class="navbar-logo ms-5">
+      <router-link to="/" class="navbar-logo me-auto">
         <img src="../assets/logo.svg" alt="Logo" width="36" height="24" />
       </router-link>
 
@@ -34,3 +34,7 @@
 import { useRouter } from "vue-router";
 const router = useRouter();
 </script>
+
+<style scoped>
+/* ...existing styles... */
+</style>
