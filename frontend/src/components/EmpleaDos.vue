@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid">
-    <h2 class="mb-4 text-center">Gestión de empleados</h2>
+    <h2 class="mb-3 text-center">Gestión de empleados</h2>
 
     <div class="row g-4">
       <!-- FORMULARIO -->
@@ -130,15 +130,12 @@ import { ref, onMounted } from "vue";
 const empleados = ref([]);
 
 const empleado = ref({
-  id: null,
   apellidos: "",
   nombre: "",
   email: "",
   movil: "",
   puesto: "",
 });
-
-let contadorId = 1;
 
 function getEmpleado() {
   // Por ahora devuelve array local vacío
@@ -156,10 +153,10 @@ function addEmpleado() {
   }
 
     if (empleado.value.movil && !validarMovil(empleado.value.movil)) {
-    return alerta('error', 'Error', 'El número de móvil es obligatorio o no tiene formato válido');
+    return alerta('error', 'Error', 'Número de móvil es obligatorio o no tiene formato válido');
   }
 
-  const nuevo = { ...empleado.value, id: contadorId++,
+  const nuevo = { ...empleado.value,
     nombre: capitalizar(empleado.value.nombre),
     apellidos: capitalizar(empleado.value.apellidos)
    }

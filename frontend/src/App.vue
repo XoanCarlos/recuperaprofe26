@@ -1,7 +1,7 @@
 <template>
-  <div class="d-flex flex-column min-vh-100 mx-auto" style="width: 80%;">
+  <div class="d-flex flex-column min-vh-100 mx-auto" style="width: 85%;">
     <NavBar />
-    <main class="flex-grow-1  mt-3">
+    <main class="flex-grow-1  mt-2">
       <div class= "container-lg">
         <router-view />
       </div>
