@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid">
-    <h2 class="mb-4 text-center">Gestión de tareas</h2>
+    <h2 class="mb-3 mt-3 text-center">Gestión de tareas</h2>
     <div class="row g-4">
       <!-- FORMULARIO -->
       <div class="col-lg-4 col-md-5">
@@ -105,7 +105,9 @@
               </div>
 
               <div class="text-center">
-                <button class="btn btn-success btn-sm">Grabar</button>
+                <button class="btn btn-primary btn-sm">
+                  {{ tarea.id ? "Actualizar" : "Grabar" }}
+                </button>
               </div>
             </form>
           </div>
@@ -132,6 +134,7 @@
                   <th>Empleado</th>
                   <th>Estado</th>
                   <th>Prioridad</th>
+                  <th>Gestión</th>
                 </tr>
               </thead>
 
@@ -152,6 +155,15 @@
                   </td>
 
                   <td class="text-left">{{ t.prioridad }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-warning me-2" @click="selTarea(t)">
+                      <i class="bi bi-pen"></i>
+                    </button>
+
+                    <button class="btn btn-sm btn-danger" @click="delTarea(t.id)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -206,12 +218,46 @@ function buscarEmpleado() {
 }
 
 function addTarea() {
-  const nueva = {
-    ...tarea.value,
-    id: contadorId++,
-  };
+  if (tarea.value.id) {
+    // EDITAR
+    const index = tareas.value.findIndex(t => t.id === tarea.value.id);
 
-  tareas.value.push(nueva);
+    if (index !== -1) {
+      tareas.value[index] = { ...tarea.value };
+    }
+  } else {
+    // CREAR
+    const nueva = {
+      ...tarea.value,
+      id: contadorId++,
+    };
+
+    tareas.value.push(nueva);
+  }
+
+  // Limpiar formulario
+  tarea.value = {
+    id: null,
+    fecha: "",
+    tarea: "",
+    descripcion: "",
+    estado: "pendiente",
+    prioridad: "media",
+    empleadoId: "",
+  };
+}
+
+function selTarea(t) {
+  tarea.value = { ...t };
+} 
+
+function delTarea(id) {
+  alertar("warning", "¿Desea eliminar esta tarea?", "").then((result) =>{
+    if (result.isConfirmed) {
+      tareas.value = tareas.value.filter((t) => t.id !== id);
+
+    }
+  });
 }
 
 function nombreEmpleado(id) {
@@ -231,5 +277,16 @@ function colorEstado(estado) {
     case "finalizada":
       return "bg-success";
   }
+}
+
+function alertar(tipo, titulo, texto) {
+  return Swal.fire({
+    icon: tipo,
+    title: titulo,
+    text: texto,
+    showCancelButton: true,
+    confirmButtonText: "Aceptar",
+    cancelButtonText: "Cancelar",
+  });
 }
 </script>

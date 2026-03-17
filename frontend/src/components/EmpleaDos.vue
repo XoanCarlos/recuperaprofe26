@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid">
-    <h2 class="mb-3 text-center">Gestión de empleados</h2>
+    <h2 class="mb-3 mt-3 text-center">Gestión de empleados</h2>
 
     <div class="row g-4">
       <!-- FORMULARIO -->
@@ -61,7 +61,9 @@
               </div>
 
               <div class="mb-3 text-center">
-                <button class="btn btn-success btn-sm">Grabar</button>
+                <button class="btn btn-primary btn-sm">
+                  {{ empleado.id ? "Actualizar" : "Grabar" }}
+                </button>
               </div>
             </form>
           </div>
@@ -128,8 +130,10 @@ import Swal from "sweetalert2";
 import { ref, onMounted } from "vue";
 
 const empleados = ref([]);
+let contadorId = 1; // Contador para asignar IDs únicos a los empleados
 
 const empleado = ref({
+  id: null,
   apellidos: "",
   nombre: "",
   email: "",
@@ -144,35 +148,57 @@ function getEmpleado() {
 
 function addEmpleado() {
   if (!empleado.value.nombre) {
-    return alerta('error', 'Error', 'El nombre es obligatorio');
+    return alerta("error", "Error", "El nombre es obligatorio");
   }
 
-
-  if (empleado.value.movil  && !validarEmail(empleado.value.email)) {
-    return alerta('error', 'Error', 'El email es obligatorio o no tiene un formato válido');
+  if (empleado.value.email && !validarEmail(empleado.value.email)) {
+    return alerta("error", "Error", "Email no válido");
   }
 
-    if (empleado.value.movil && !validarMovil(empleado.value.movil)) {
-    return alerta('error', 'Error', 'Número de móvil es obligatorio o no tiene formato válido');
+  if (empleado.value.movil && !validarMovil(empleado.value.movil)) {
+    return alerta("error", "Error", "Número de móvil no válido");
   }
 
-  const nuevo = { ...empleado.value,
-    nombre: capitalizar(empleado.value.nombre),
-    apellidos: capitalizar(empleado.value.apellidos)
-   }
-  empleados.value.push(nuevo)
-  limpiarFormulario()
+  if (empleado.value.id) {
+    // ✏️ EDITAR
+    const index = empleados.value.findIndex((e) => e.id === empleado.value.id);
 
-  alerta('success', 'Empleado guardado', '')
+    if (index !== -1) {
+      empleados.value[index] = {
+        ...empleado.value,
+        nombre: capitalizar(empleado.value.nombre),
+        apellidos: capitalizar(empleado.value.apellidos),
+      };
+    }
+
+    alerta("success", "Empleado actualizado", "");
+  } else {
+    // ➕ CREAR
+    const nuevo = {
+      ...empleado.value,
+      id: contadorId++,
+      nombre: capitalizar(empleado.value.nombre),
+      apellidos: capitalizar(empleado.value.apellidos),
+    };
+
+    empleados.value.push(nuevo);
+
+    alerta("success", "Empleado guardado", "");
+  }
+
+  limpiarFormulario();
 }
-
 
 function selEmpleado(emp) {
   empleado.value = { ...emp };
 }
 
 function delEmpleado(id) {
-  empleados.value = empleados.value.filter((e) => e.id !== id);
+  alerta("warning", "¿Desea eliminar este empleado?", "").then((result) => {
+    if (result.isConfirmed) {
+      empleados.value = empleados.value.filter((e) => e.id !== id);
+    }
+  });
 }
 
 function limpiarFormulario() {
@@ -201,11 +227,11 @@ function validarMovil(movil) {
 }
 
 function capitalizar(str) {
-  if (!str) return '';
+  if (!str) return "";
   return str
-    .split(' ')                    // separa en palabras
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // capitaliza cada palabra
-    .join(' ');                     // vuelve a unir con espacios
+    .split(" ") // separa en palabras
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // capitaliza cada palabra
+    .join(" "); // vuelve a unir con espacios
 }
 /**
  * Muestra un SweetAlert
