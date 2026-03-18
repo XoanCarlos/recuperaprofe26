@@ -1,4 +1,22 @@
 {
-    "empleados":[],
-    "tareas":[]
+  "empleados": [
+    {
+      "id": "d8be",
+      "apellidos": "Volar Blanca",
+      "nombre": "Paloma",
+      "email": "paloma@mail.com",
+      "movil": "654138546",
+      "puesto": "ventas"
+    },
+    {
+      "id": "880f",
+      "apellidos": "Mulo Cansado",
+      "nombre": "Pablo",
+      "email": "mulo@mail.com",
+      "movil": "652314724",
+      "puesto": "contabilidad"
+    }
+  ],
+  "tareas": [],
+  "$schema": "./node_modules/json-server/schema.json"
 }

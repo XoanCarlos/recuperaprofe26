@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "concurrently \"npm run dev --prefix frontend\" \"json-server --watch backend/db/db.json --port 3000\"",
+    "dev": "vite",
+    "start": "concurrently \"npm run dev\" \"json-server --watch backend/db/db.json --port 3000\"",
     "build": "vite build",
     "preview": "vite preview"
   },

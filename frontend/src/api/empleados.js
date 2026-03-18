@@ -1,5 +1,5 @@
 import axios from "axios";
-
+console.log("API URL desde Axios:", import.meta.env.VITE_API_URL); 
 // Configuración de Axios directamente aquí
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL, // lee del .env

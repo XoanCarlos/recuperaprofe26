@@ -10,7 +10,7 @@
             <i class="bi bi-person"></i> Datos del empleado
           </div>
           <div class="card-body">
-            <form @submit.prevent="addEmpleado">
+            <form @submit.prevent="saveEmpleado">
               <div class="mb-3">
                 <label class="form-label">Apellidos</label>
                 <input
@@ -128,10 +128,9 @@
 <script setup>
 import Swal from "sweetalert2";
 import { ref, onMounted } from "vue";
+import { getEmpleados, addEmpleado, updateEmpleado, deleteEmpleado } from "../api/empleados";
 
 const empleados = ref([]);
-let contadorId = 1; // Contador para asignar IDs únicos a los empleados
-
 const empleado = ref({
   id: null,
   apellidos: "",
@@ -141,64 +140,79 @@ const empleado = ref({
   puesto: "",
 });
 
-function getEmpleado() {
-  // Por ahora devuelve array local vacío
-  empleados.value = [];
-}
-
-function addEmpleado() {
-  if (!empleado.value.nombre) {
-    return alerta("error", "Error", "El nombre es obligatorio");
+// Cargar empleados desde backend de forma segura
+const getEmpleado = async () => {
+  try {
+    const data = await getEmpleados();
+    // Asegúrate de que sea siempre un array
+    empleados.value = Array.isArray(data) ? data : [];
+  } catch (err) {
+    alerta("error", "Error", "No se pudieron cargar los empleados");
+    console.error(err);
+    empleados.value = [];
   }
+};
 
-  if (empleado.value.email && !validarEmail(empleado.value.email)) {
-    return alerta("error", "Error", "Email no válido");
-  }
+// Guardar o actualizar empleado
+const saveEmpleado = async () => {
+  // Validaciones
+  if (!empleado.value.nombre) return alerta("error", "Error", "El nombre es obligatorio");
+  if (empleado.value.email && !validarEmail(empleado.value.email)) return alerta("error", "Error", "Email no válido");
+  if (empleado.value.movil && !validarMovil(empleado.value.movil)) return alerta("error", "Error", "Número de móvil no válido");
 
-  if (empleado.value.movil && !validarMovil(empleado.value.movil)) {
-    return alerta("error", "Error", "Número de móvil no válido");
-  }
+  // Capitalizar nombre y apellidos
+  const empleadoFormateado = {
+    ...empleado.value,
+    nombre: capitalizar(empleado.value.nombre),
+    apellidos: capitalizar(empleado.value.apellidos)
+  };
 
-  if (empleado.value.id) {
-    // ✏️ EDITAR
-    const index = empleados.value.findIndex((e) => e.id === empleado.value.id);
-
-    if (index !== -1) {
-      empleados.value[index] = {
-        ...empleado.value,
-        nombre: capitalizar(empleado.value.nombre),
-        apellidos: capitalizar(empleado.value.apellidos),
-      };
+  try {
+    if (empleado.value.id) {
+      // Actualizar → enviamos todo, incluido id
+      const actualizado = await updateEmpleado(empleadoFormateado);
+      const index = empleados.value.findIndex(e => e.id === actualizado.id);
+      if (index !== -1) empleados.value[index] = actualizado;
+      alerta("success", "Empleado actualizado", "");
+    } else {
+      // Crear → **NO enviamos id** para que json-server genere uno automáticamente
+      const { id, ...nuevoEmpleado } = empleadoFormateado; 
+      const nuevo = await addEmpleado(nuevoEmpleado);
+      empleados.value.push(nuevo);
+      alerta("success", "Empleado guardado", "");
     }
-
-    alerta("success", "Empleado actualizado", "");
-  } else {
-    // ➕ CREAR
-    const nuevo = {
-      ...empleado.value,
-      id: contadorId++,
-      nombre: capitalizar(empleado.value.nombre),
-      apellidos: capitalizar(empleado.value.apellidos),
-    };
-
-    empleados.value.push(nuevo);
-
-    alerta("success", "Empleado guardado", "");
+  } catch (err) {
+    alerta("error", "Error", "No se pudo guardar el empleado");
+    console.error(err);
   }
 
+  // Limpiar formulario
   limpiarFormulario();
-}
+};
 
 function selEmpleado(emp) {
   empleado.value = { ...emp };
 }
 
-function delEmpleado(id) {
-  alerta("warning", "¿Desea eliminar este empleado?", "").then((result) => {
-    if (result.isConfirmed) {
-      empleados.value = empleados.value.filter((e) => e.id !== id);
-    }
+async function delEmpleado(id) {
+  const result = await Swal.fire({
+    icon: "warning",
+    title: "¿Desea eliminar este empleado?",
+    showCancelButton: true,
+    confirmButtonText: "Sí",
+    cancelButtonText: "No"
   });
+
+  if (result.isConfirmed) {
+    try {
+      await deleteEmpleado(id);
+      empleados.value = empleados.value.filter(e => e.id !== id);
+      alerta("success", "Empleado eliminado", "");
+    } catch (err) {
+      alerta("error", "Error", "No se pudo eliminar el empleado");
+      console.error(err);
+    }
+  }
 }
 
 function limpiarFormulario() {
@@ -215,6 +229,7 @@ function limpiarFormulario() {
 onMounted(() => {
   getEmpleado();
 });
+
 /// funcionnes para mostrar alertas con SweetAlert2
 function validarEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

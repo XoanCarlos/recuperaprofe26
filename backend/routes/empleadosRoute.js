@@ -1,9 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// array local temporal
-let empleados = [];
-let contadorId = 1;
 
 // GET todos
 router.get('/', (req, res) => {
